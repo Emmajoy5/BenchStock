@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BenchStock</title>
+<meta name="description" content="Free, open-source stock manager for research groups. Strains, plant and insect lines, cell lines, plasmids, primers, extracts and field samples in one place, linked from sample to sequence archive, on your own server.">
+<meta property="og:title" content="BenchStock">
+<meta property="og:description" content="Every stock your group keeps, where it is, when it is due and where it came from. Free, open source and self-hosted.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://emmajoy5.github.io/BenchStock/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preload" href="assets/fonts/source-serif-4-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Source Serif 4";font-weight:400;font-style:normal;font-display:swap;src:url(assets/fonts/source-serif-4-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Serif 4";font-weight:600;font-style:normal;font-display:swap;src:url(assets/fonts/source-serif-4-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Serif 4";font-weight:700;font-style:normal;font-display:swap;src:url(assets/fonts/source-serif-4-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-weight:400;font-style:normal;font-display:swap;src:url(assets/fonts/source-sans-3-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-weight:600;font-style:normal;font-display:swap;src:url(assets/fonts/source-sans-3-latin-600-normal.woff2) format("woff2")}
+
+:root{
+  --frost:#f5f6fb; --paper:#ffffff; --ink:#151830; --soft:#4e5372; --line:#dcdff0;
+  --indigo:#3b3fb3; --indigo-deep:#2c2f8f; --amber:#a85d12; --night:#0b0d1f; --night-2:#262a6b;
+  --ok:#2f7d4f; --soon:#b97a00; --late:#c23b30;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img,video{max-width:100%;height:auto;display:block}
+a{color:var(--indigo-deep);text-underline-offset:3px}
+a:hover{color:var(--amber)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.12;letter-spacing:-.012em;margin:0}
+h1{font-size:clamp(2.4rem,5.4vw,3.9rem)}
+h2{font-size:clamp(1.8rem,3.4vw,2.5rem)}
+h3{font-size:1.45rem;font-weight:600}
+p{margin:0 0 1em;max-width:62ch}
+.soft{color:var(--soft)}
+code{font-family:var(--mono);font-size:.88em;background:#eef0fa;padding:1px 5px;border-radius:4px}
+
+/* header */
+header.site{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.site .wrap{display:flex;align-items:center;gap:24px;min-height:64px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-weight:700;font-size:1.15rem;color:var(--ink);text-decoration:none}
+.brand img{height:34px;width:34px}
+header.site nav{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap;font-size:.98rem}
+header.site nav a{color:var(--soft);text-decoration:none;padding:6px 0}
+header.site nav a:hover{color:var(--ink);text-decoration:underline}
+
+/* hero */
+.hero{padding:64px 0 72px;background:linear-gradient(180deg,var(--frost),var(--paper))}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center}
+.hero .lead{font-size:1.22rem;color:var(--soft);margin:22px 0 30px;max-width:48ch}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:13px 22px;border-radius:8px;font-weight:600;text-decoration:none;font-size:1rem;border:1.5px solid var(--indigo);transition:background .15s,color .15s}
+.btn.primary{background:var(--indigo);color:#fff}
+.btn.primary:hover{background:var(--indigo-deep);color:#fff}
+.btn.ghost{color:var(--indigo-deep);background:transparent}
+.btn.ghost:hover{background:var(--indigo);color:#fff}
+
+/* provenance chain */
+.chain{background:#eceefa;border:1px solid var(--line);border-radius:18px;padding:22px}
+.chain .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.node{all:unset;box-sizing:border-box;cursor:pointer;display:block;background:#fff;border:1.5px solid #c9cdeb;border-radius:12px;padding:10px 14px;line-height:1.3}
+.node:hover{border-color:var(--ink)}
+.node:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.node[aria-pressed="true"]{border-color:var(--indigo);box-shadow:0 0 0 2px var(--indigo)}
+.node .k{display:block;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);font-weight:600}
+.node .n{display:block;font-family:var(--serif);font-weight:600;font-size:1.05rem}
+.node .n i{font-style:italic}
+.span2{grid-column:1 / -1}
+.rel{font-size:.85rem;color:var(--soft);text-align:center;align-self:center}
+.rel::before{content:"\2193  "}
+.card{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-height:172px}
+.card .t{font-family:var(--serif);font-weight:600;font-size:1.15rem;line-height:1.25}
+.card dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:.93rem}
+.card dt{color:var(--soft)} .card dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.chain .cap-note{margin:12px 2px 0;font-size:.88rem;color:var(--soft);max-width:none}
+
+/* sections */
+section{padding:84px 0}
+section.tint{background:var(--frost)}
+.sec-head{margin-bottom:40px}
+.sec-head p{font-size:1.15rem;color:var(--soft);margin-top:14px}
+
+/* tour */
+#tour{background:var(--night);color:#e7e9fb;background-image:radial-gradient(900px 500px at 15% 0%,var(--night-2),transparent 70%)}
+#tour h2{color:#fff}
+#tour .grid{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:48px;align-items:center}
+#tour p{color:#b2b6dc}
+.chapters{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:2px}
+.chapters button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;gap:16px;padding:10px 12px;border-radius:8px;color:#d7daf3;font-size:1.02rem}
+.chapters button:hover{background:rgba(255,255,255,.07);color:#fff}
+.chapters button:focus-visible{outline:3px solid #f0b46a}
+.chapters .t{font-variant-numeric:tabular-nums;color:#a9adff;min-width:2.6em}
+.vwrap{border-radius:14px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+video{width:100%;aspect-ratio:16/9;background:#000}
+
+/* features */
+.feat{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:center;padding:34px 0}
+.feat.flip{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+.feat.flip .txt{order:2}
+.feat h3{margin-bottom:12px}
+.feat ul{margin:12px 0 0;padding-left:1.1em;color:var(--soft);max-width:56ch}
+.feat li{margin:4px 0}
+.shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 8px 30px rgba(21,24,48,.08)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.shot figcaption{font-size:.85rem;color:var(--soft);padding:8px 12px;border-top:1px solid var(--line);background:#fff}
+figure{margin:0}
+.more{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 56px;margin-top:30px}
+.more h3{font-size:1.2rem;margin-bottom:6px}
+.more p{color:var(--soft);margin:0}
+
+/* tested */
+table.tested{width:100%;border-collapse:collapse;font-size:1.02rem}
+table.tested th,table.tested td{text-align:left;vertical-align:top;padding:14px 16px;border-top:1px solid var(--line)}
+table.tested tr:last-child td,table.tested tr:last-child th{border-bottom:1px solid var(--line)}
+table.tested th{width:26%;font-weight:600;font-family:var(--serif);font-size:1.08rem}
+.note{margin-top:22px;padding:16px 20px;border-left:4px solid var(--amber);background:#fbf3ec;max-width:78ch;border-radius:0 8px 8px 0}
+
+/* privacy */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.two h3{margin-bottom:10px}
+
+/* faq */
+details{border-top:1px solid var(--line);padding:4px 0}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;list-style:none;padding:16px 36px 16px 0;font-family:var(--serif);font-weight:600;font-size:1.2rem;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:6px;top:12px;font-size:1.5rem;font-weight:400;color:var(--indigo)}
+details[open] summary::after{content:"\2212"}
+details p{padding-bottom:12px;color:var(--soft)}
+
+footer{background:var(--night);color:#b2b6dc;padding:48px 0;font-size:.95rem}
+footer a{color:#b9bdff}
+footer .wrap{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;justify-content:space-between}
+footer p{margin:0 0 6px;max-width:60ch}
+[hidden]{display:none!important}
+
+@media (max-width:900px){
+  .hero .wrap,#tour .grid,.feat,.feat.flip,.two{grid-template-columns:1fr;gap:34px}
+  .feat.flip .txt{order:0}
+  .more{grid-template-columns:1fr}
+  section{padding:60px 0}
+  .hero{padding:40px 0 48px}
+  table.tested th{width:auto;display:block;border-bottom:0;padding-bottom:0}
+  table.tested td{display:block;border-top:0;padding-top:4px}
+}
+@media (max-width:520px){
+  body{font-size:17px}
+  header.site nav{gap:14px;font-size:.92rem}
+  .chain{padding:14px}
+  .pair{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="34" height="34">BenchStock</a>
+    <nav aria-label="Page sections">
+      <a href="#tour">Tour</a><a href="#features">Features</a><a href="#tested">Tested</a><a href="#privacy">Privacy</a><a href="#faq">Questions</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" aria-labelledby="h-hero" style="padding-top:64px">
+  <div class="wrap">
+    <div>
+      <h1 id="h-hero">Every stock your group keeps, and where it came from.</h1>
+      <p class="lead">BenchStock keeps a research group's strains, seed lots, fly stocks, cell lines, plasmids, primers, extracts and field samples in one searchable place. It links each field sample to its isolates, extracts and sequencing records, and shares it project by project. It is free, open source and runs on your own computer or server.</p>
+      <div class="btns">
+        <a class="btn primary" href="#tour">Watch the 95 second tour</a>
+        <a class="btn ghost" href="#features">See what it does</a>
+        <a class="btn ghost" href="https://github.com/Emmajoy5/BenchStock">Get the code</a>
+      </div>
+    </div>
+
+    <div class="chain" aria-label="Example provenance chain">
+      <div class="grid" role="group" aria-label="Linked records, from a soil sample to its sequencing record. Choose one to see it.">
+        <button class="node span2" type="button" data-k="soil" aria-pressed="false"><span class="k">Environmental sample</span><span class="n">Plot 3 rhizosphere soil, June</span></button>
+        <span class="rel">isolated</span><span class="rel">DNA extracted</span>
+        <button class="node" type="button" data-k="iso" aria-pressed="false"><span class="k">Microbial strain</span><span class="n"><i>Pseudomonas fluorescens</i> RS-12</span></button>
+        <button class="node" type="button" data-k="dna" aria-pressed="false"><span class="k">DNA extract</span><span class="n">Plot 3 rhizosphere DNA</span></button>
+        <span></span><span class="rel">sequenced</span>
+        <span></span>
+        <button class="node" type="button" data-k="seq" aria-pressed="false"><span class="k">Sequencing record</span><span class="n">16S amplicons, Illumina</span></button>
+      </div>
+      <div class="card" id="card" aria-live="polite"></div>
+      <p class="cap-note">Example records with invented accession numbers. Select one to see its details.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tour" aria-labelledby="h-tour">
+  <div class="wrap grid">
+    <div>
+      <h2 id="h-tour">The whole tool in 95 seconds</h2>
+      <p style="margin-top:16px">Captions carry the story, so it works with the sound off. Jump to any part:</p>
+      <ul class="chapters" id="chapters">
+        <li><button data-t="11"><span class="t">0:11</span>See every check that is coming due</button></li>
+        <li><button data-t="18"><span class="t">0:18</span>Add a plasmid with its own fields</button></li>
+        <li><button data-t="37"><span class="t">0:37</span>Draw a plasmid map from a GenBank file</button></li>
+        <li><button data-t="49"><span class="t">0:49</span>Primer Tm and sequence search</button></li>
+        <li><button data-t="58"><span class="t">0:58</span>Field samples, MIxS fields and links</button></li>
+        <li><button data-t="68"><span class="t">1:08</span>Projects and who can see what</button></li>
+        <li><button data-t="77"><span class="t">1:17</span>Find anything and print QR labels</button></li>
+        <li><button data-t="85"><span class="t">1:25</span>Import a spreadsheet, export everything</button></li>
+      </ul>
+    </div>
+    <div class="vwrap">
+      <video id="tourvid" controls preload="metadata" poster="assets/tour-poster.jpg" playsinline>
+        <source src="assets/tour.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="assets/tour.mp4">Download the tour</a>.
+      </video>
+    </div>
+  </div>
+</section>
+
+<section id="features" aria-labelledby="h-feat">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="h-feat">What it does for a research group</h2>
+      <p>Built around the questions a group asks about its freezers: what do we have, where is it, is it still good, where did it come from, and who can see it.</p>
+    </div>
+
+    <div class="feat">
+      <div class="txt">
+        <h3>One catalogue for every kind of stock</h3>
+        <p class="soft">Nine kinds of record are built in: microbial strains, plant lines, insect stocks, cell lines, plasmids, oligos and primers, DNA and RNA extracts, biological samples and environmental samples. Each kind has its own fields, checked as they are entered, and every record has a freezer, box and position.</p>
+        <p class="soft">If your group keeps something else, an administrator can add a new kind of record with its own fields, and it works with search, storage, labels, import and export straight away.</p>
+      </div>
+      <figure class="shot"><img src="assets/shot-catalog.webp" alt="Catalogue listing strains, plant lines, a fly stock, a cell line, samples, extracts, primers and plasmids in one table" loading="lazy" width="1200" height="1031"></figure>
+    </div>
+
+    <div class="feat flip">
+      <div class="txt">
+        <h3>Checks that come due, for each kind of stock</h3>
+        <p class="soft">Revivals for frozen strains, germination tests for seed lots, transfers to fresh food for fly stocks and mycoplasma tests for cell lines. Set an interval on a record and the home page lists what is due, in amber five days ahead and in red when it is overdue. Each check is dated and carries the name of the person who logged it.</p>
+      </div>
+      <figure class="shot"><img src="assets/shot-home.webp" alt="Home page listing a mycoplasma test, a revival, a fly transfer and a germination test by due date" loading="lazy" width="1200" height="825"></figure>
+    </div>
+
+    <div class="feat">
+      <div class="txt">
+        <h3>From field sample to sequence archive</h3>
+        <p class="soft">Environmental samples carry the MIxS fields NCBI asks for, checked as you type: dates, coordinates, country names, ENVO terms and pH. The page says whether anything is missing, and a sample sheet downloads in the column layout that BioSample submissions use.</p>
+        <p class="soft">Isolates and extracts link back to the sample they came from. A sequencing record names what was sequenced, holds its BioProject, BioSample and run accessions, checked for format and linked to NCBI, and lists the data files by path and checksum. The files stay where they are.</p>
+      </div>
+      <div class="pair">
+        <figure class="shot"><img src="assets/shot-sample.webp" alt="Soil sample with its MIxS fields, linked isolates and extract, and its sequencing record" loading="lazy" width="1200" height="1298"><figcaption>A soil sample and everything linked to it</figcaption></figure>
+        <figure class="shot"><img src="assets/shot-seqrec.webp" alt="Sequencing record with accessions and two read files listed by path and checksum" loading="lazy" width="1200" height="773"><figcaption>Its 16S sequencing record</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="feat flip">
+      <div class="txt">
+        <h3>Plasmids and primers with their sequences</h3>
+        <p class="soft">Upload a GenBank or FASTA file and a plasmid gets a circular map with its features and the enzymes that cut it once. A primer shows its length, GC content and melting temperature, worked out by the nearest-neighbour method for stated salt and primer concentrations.</p>
+        <p class="soft">Ask which of your plasmids a primer binds: the sequence search looks through every sequence you can open, on both strands and across the origin, allowing up to three mismatches, and flags mismatches near the 3' end.</p>
+      </div>
+      <div class="pair">
+        <figure class="shot"><img src="assets/shot-plasmid.webp" alt="Plasmid page with its sequence, a circular map and its unique restriction sites" loading="lazy" width="1200" height="806"><figcaption>Map and unique cutters</figcaption></figure>
+        <figure class="shot"><img src="assets/shot-search.webp" alt="Sequence search finding the T7 promoter primer and the same site in three plasmids" loading="lazy" width="1200" height="675"><figcaption>Which plasmids does this primer bind?</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="feat">
+      <div class="txt">
+        <h3>Projects that only their members can see</h3>
+        <p class="soft">Every record belongs to a project. Colleagues join with the project's code, and the owner approves each one as a viewer, who can read, or an editor, who can also make changes. Every request, approval and change of role is kept in the project's access history.</p>
+        <p class="soft">People outside a project cannot open, search or export its records. Shared freezers still work: a position used by a project you cannot see shows as taken, without saying what is in it. The lab head gets a report of who can see each project.</p>
+      </div>
+      <figure class="shot"><img src="assets/shot-project.webp" alt="Project page with its members and roles, its access code and its access history" loading="lazy" width="1200" height="949"></figure>
+    </div>
+
+    <div class="more">
+      <div><h3>QR labels</h3><p>Print labels in three sizes with each record's key details and a QR code that opens its page on any phone.</p></div>
+      <div><h3>Bring your spreadsheets</h3><p>Import a CSV or Excel file of mixed record types with a preview first. Export the whole lab as plain CSV files or one workbook, with a sheet for each kind of record.</p></div>
+      <div><h3>Sign-in that suits your institution</h3><p>Passwords with lockout, optional two-step codes from an authenticator app, and sign-in with an institutional account through OpenID Connect. Forgotten passwords are reset with single-use links.</p></div>
+      <div><h3>Several labs on one server</h3><p>One installation can serve several labs, each walled off from the others. The person who runs the server can suspend a lab but never sees its records.</p></div>
+      <div><h3>Works on phones and tablets</h3><p>Pages are built to work on a phone, so you can look up a box or log a check at the bench. No app store, nothing to install.</p></div>
+      <div><h3>Tools for microbial strains</h3><p>Strains keep the plate photographs, colony reading, 3D plate models and Gram stain history of the <a href="https://emmajoy5.github.io/Digital-Microbial-Lib/">Microbial Digital Library</a>, the sister tool BenchStock grew from.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tested" class="tint" aria-labelledby="h-tested">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="h-tested">What has been tested</h2>
+      <p>Results from the project's own test suites. The same suites run on Linux, Windows and macOS for every change pushed to GitHub.</p>
+    </div>
+    <table class="tested">
+      <tbody>
+        <tr><th scope="row">Automated checks</th><td>961 checks in six test suites pass on version 5.2.0, covering accounts, projects, records, samples and sequencing data, sign-in, password resets, and backup and restore.</td></tr>
+        <tr><th scope="row">Who can see what</th><td>Every kind of record, photo, label, link, search result and export was checked from both sides: members can use it, viewers can read but not change it, people outside the project get "not found", and other labs see nothing.</td></tr>
+        <tr><th scope="row">Large collection</th><td>With 50,000 strains and 6,000 other records on a two-core server, every page tested answered in 0.67 seconds or less, and the full lab export took under 6 seconds.</td></tr>
+        <tr><th scope="row">Sequence search</th><td>A 22-base search allowing two mismatches looked through 4,000 plasmids and primers in 0.18 seconds.</td></tr>
+        <tr><th scope="row">Sample checks</th><td>MIxS dates, coordinates, country names, ENVO terms and pH are checked at entry, and BioProject, BioSample, SRA run, GenBank and assembly accessions are checked for format.</td></tr>
+        <tr><th scope="row">Accessibility</th><td>38 pages checked at desktop and phone width for labelled fields, text contrast, keyboard focus, heading order and sideways scrolling: all 76 checks pass.</td></tr>
+        <tr><th scope="row">Backup and restore</th><td>A working installation was backed up and restored in full, and damaged or unexpected archives were refused.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Next steps are an independent security review and a study with working labs. Labs doing GLP or GMP work should check the tool against their own quality rules before relying on it.</p>
+  </div>
+</section>
+
+<section id="privacy" aria-labelledby="h-priv">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="h-priv">Your data stays with you</h2></div>
+    <div class="two">
+      <div>
+        <h3>Where it lives</h3>
+        <p class="soft">BenchStock runs on a computer or server that you or your institution control. Records, photographs and models are stored there, in one data folder that is easy to back up and restore. Sequencing files are never copied in: only their path and checksum are kept. The authors never receive your data, and the site you are reading has no sign-in and holds none.</p>
+        <p class="soft">Nothing needs an internet connection beyond your own network. Optional AI helpers are off unless the lab adds its own key.</p>
+      </div>
+      <div>
+        <h3>Who is responsible</h3>
+        <p class="soft">Whoever runs an installation is responsible for its security, backups and the people it gives access to. Anyone who can reach the server's files can read them, so keep it where only trusted people have access. The software is shared under the MIT licence, as it is, without warranty.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="tint" aria-labelledby="h-faq">
+  <div class="wrap" style="max-width:860px">
+    <div class="sec-head"><h2 id="h-faq">Questions</h2></div>
+    <details><summary>Is it free?</summary><p>Yes. It is released under the MIT licence, so labs can use, change and share it at no charge. The code is on <a href="https://github.com/Emmajoy5/BenchStock">GitHub</a>.</p></details>
+    <details><summary>Can I try it now?</summary><p>Watch the tour above to see the main screens. To try it yourself, download it from GitHub and follow the README: it runs on a laptop in a few minutes, and when you set up your lab you can ask for a few example strains to start from. <span data-needs="contactEmail" hidden>Write to us if your group would like to be an early user.</span></p></details>
+    <details><summary>What does it run on?</summary><p>Python 3.10 or later on Windows, Mac or Linux, with a web browser on any device on the same network. A Docker setup and an installation guide for IT staff are included.</p></details>
+    <details><summary>How is it different from the Microbial Digital Library?</summary><p>The <a href="https://emmajoy5.github.io/Digital-Microbial-Lib/">Microbial Digital Library</a> is for a lab's working culture collection, especially in brewing and applied microbiology. BenchStock grew from it for research groups that keep many kinds of stock: it adds the other record types, projects with their own access, links between records, sequence tools and sequencing records. Its microbial strains keep the Library's plate and 3D tools.</p></details>
+    <details><summary>Can several groups share one server?</summary><p>Yes. Each lab signs up with a one-time activation code from whoever runs the server and is walled off from every other lab. Within a lab, each project is open only to its members.</p></details>
+    <details><summary>Is it suitable for regulated work?</summary><p>Every entry is dated and tied to the account that made it, and every change to who can see a project is logged. Electronic signatures and formal GLP or GMP validation are not part of this release, so check with your quality team before using it for regulated records.</p></details>
+    <details><summary>How do I cite it?</summary><p>A paper describing the tool is in preparation. Until it is published, please cite the software release; its DOI will appear here once version 5.2.0 is archived on Zenodo.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <p><strong style="color:#fff;font-family:var(--serif);font-size:1.1rem">BenchStock</strong></p>
+      <p>Free, open-source stock manager for research groups. MIT licence, provided without warranty.</p>
+    </div>
+    <div>
+      <p><a href="https://github.com/Emmajoy5/BenchStock">Get the code</a></p>
+      <p><a href="https://emmajoy5.github.io/Digital-Microbial-Lib/">Microbial Digital Library</a></p>
+      <p data-needs="contactEmail" hidden>Contact: <a id="f-contact" href="#"></a></p>
+      <p data-needs="paperUrl" hidden><a id="f-paper" href="#">Read the paper</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Fill these in to show contact and paper links. Anything left empty stays hidden. */
+const SITE = {
+  contactEmail: "",   // e.g. "name@institution.ac.uk"
+  paperUrl: ""        // link to the published paper
+};
+
+(function () {
+  document.querySelectorAll("[data-needs]").forEach(function (el) {
+    if (SITE[el.dataset.needs]) el.hidden = false;
+  });
+  if (SITE.contactEmail) {
+    var f = document.getElementById("f-contact"); f.href = "mailto:" + SITE.contactEmail; f.textContent = SITE.contactEmail;
+  }
+  if (SITE.paperUrl) document.getElementById("f-paper").href = SITE.paperUrl;
+
+  /* tour chapters */
+  var vid = document.getElementById("tourvid");
+  document.querySelectorAll("#chapters button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      vid.currentTime = parseFloat(b.dataset.t);
+      var p = vid.play(); if (p && p.catch) p.catch(function () {});
+    });
+  });
+
+  /* provenance chain: example records from the demo lab, accession numbers invented */
+  var recs = {
+    soil: ["Plot 3 rhizosphere soil, June", [["ID", "BS-ENV-0001"], ["MIxS package", "soil"], ["Collected", "June 2026, Kumasi research farm, Ghana"],
+           ["Depth, pH", "0.1 m, pH 6.2"], ["Stored", "Freezer 2 (−80) / Soil box 1 / A1"], ["MIxS fields", "all present"]]],
+    iso: ["Pseudomonas fluorescens RS-12", [["ID", "BS-PSEFLU-001"], ["Link", "isolated from Plot 3 rhizosphere soil"], ["Biosafety", "BSL-1"],
+           ["Stored", "Freezer 2 (−80) / Isolates box 3 / B1"], ["Revival", "every 180 days"]]],
+    dna: ["Plot 3 rhizosphere DNA", [["ID", "BS-EXT-0001"], ["Link", "extracted from Plot 3 rhizosphere soil"], ["Kind", "metagenomic DNA"],
+           ["Yield", "41.2 ng/µL, A260/280 1.84"], ["Stored", "Freezer 2 (−80) / DNA box 1 / C1"]]],
+    seq: ["Plot 3 rhizosphere 16S amplicons", [["ID", "SEQ-00001"], ["Made from", "the soil sample and its DNA extract"], ["Platform", "Illumina, 16S rRNA V4"],
+           ["Accessions", "PRJNA987654, SAMN38765432, two SRA runs"], ["Files", "R1 and R2 reads, path and SHA-256 kept"]]]
+  };
+  var card = document.getElementById("card"), nodes = document.querySelectorAll(".node");
+  function show(k) {
+    nodes.forEach(function (n) { n.setAttribute("aria-pressed", n.dataset.k === k ? "true" : "false"); });
+    var r = recs[k];
+    card.innerHTML = '<div class="t"></div><dl></dl>';
+    card.querySelector(".t").textContent = r[0];
+    var dl = card.querySelector("dl");
+    r[1].forEach(function (row) {
+      var dt = document.createElement("dt"); dt.textContent = row[0];
+      var dd = document.createElement("dd"); dd.textContent = row[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+  }
+  nodes.forEach(function (n) {
+    n.addEventListener("click", function () { show(n.dataset.k); });
+    n.addEventListener("mouseenter", function () { show(n.dataset.k); });
+  });
+  show("soil");
+})();
+</script>
+</body>
+</html>
